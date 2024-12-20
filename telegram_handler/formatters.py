@@ -27,7 +27,8 @@ class MarkdownFormatter(TelegramFormatter):
     def format(self, record):
 
         if record.funcName:
-            record.funcName = escape_markdown(str(record.funcName))
+            # record.funcName = escape_markdown(str(record.funcName))
+            pass
         if record.name:
             record.name = escape_markdown(str(record.name))
         if record.msg:

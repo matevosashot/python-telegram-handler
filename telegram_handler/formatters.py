@@ -1,6 +1,6 @@
 import logging
 
-from telegram_handler.utils import escape_html
+from telegram_handler.utils import escape_html, escape_markdown
 
 __all__ = ['TelegramFormatter', 'MarkdownFormatter', 'HtmlFormatter']
 
@@ -20,6 +20,29 @@ class MarkdownFormatter(TelegramFormatter):
     fmt = '`%(asctime)s` *%(levelname)s*\n[%(name)s:%(funcName)s]\n%(message)s'
     parse_mode = 'Markdown'
 
+    def __init__(self, *args, **kwargs):
+        self.use_emoji = True
+        super(MarkdownFormatter, self).__init__(*args, **kwargs)
+    
+    def format(self, record):
+
+        if record.funcName:
+            record.funcName = escape_markdown(str(record.funcName))
+        if record.name:
+            record.name = escape_markdown(str(record.name))
+        if record.msg:
+            record.msg = escape_markdown(record.getMessage())
+        
+        if self.use_emoji:
+            if record.levelno == logging.DEBUG:
+                record.levelname += ' ' + EMOJI.WHITE_CIRCLE
+            elif record.levelno == logging.INFO:
+                record.levelname += ' ' + EMOJI.BLUE_CIRCLE
+            else:
+                record.levelname += ' ' + EMOJI.RED_CIRCLE
+
+        return super(MarkdownFormatter, self).format(record)
+    
     def formatException(self, *args, **kwargs):
         string = super(MarkdownFormatter, self).formatException(*args, **kwargs)
         return '```\n%s\n```' % string
@@ -29,6 +52,7 @@ class EMOJI:
     WHITE_CIRCLE = '\U000026AA'
     BLUE_CIRCLE = '\U0001F535'
     RED_CIRCLE = '\U0001F534'
+
 
 
 class HtmlFormatter(TelegramFormatter):
